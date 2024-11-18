@@ -151,6 +151,14 @@ class AdminController extends Controller
         $category->save();
         return redirect()->route('admin.categories')->with('success', 'category has been updated successfully');
     }
-
+    //tO delete
+    public function deleteCategory($id){
+        $category = Category::findOrFail($id);
+        if (File::exists(public_path('uploads/categories/' . $category->image))) {
+            File::delete(public_path('uploads/categories/' . $category->image));
+        }
+        $category->delete();
+        return redirect()->route('admin.categories')->with('success', 'Category has been deleted successfully');
+    }
 
 }
