@@ -121,4 +121,36 @@ class AdminController extends Controller
         return redirect()->route('admin.categories')->with('success', 'category has been added successfully');
     }
 
+    //to edit brand
+    public function editCategory($id){
+        $category=Category::findOrFail($id);
+        return view('admin.category.editCategory',compact('category'));
+    }
+
+    //to store updated data
+    public function updateCategory(Request $request){
+        // Validation
+        $request->validate([
+            'name' => 'required|string',
+            'slug' => 'required|unique:categories,slug',
+            'image' => 'image|mimes:png,jpg,jpeg|max:2048'
+        ]);
+        $category=Brand::find($request->id);
+        $category->name = $request->name;
+        $category->slug = $request->slug;
+        if (!empty($request->image)) {
+            if (File::exists(public_path('uploads/categories/' . $category->image))) {
+                File::delete(public_path('uploads/categories/' . $category->image));
+            }
+            $image = $request->image;
+            $ext = $image->getClientOriginalExtension();
+            $imageName = time() . '.' . $ext;
+            $image->move(public_path('uploads/categories'), $imageName);
+            $category->image = 'uploads/categories/' . $imageName;
+        }
+        $category->save();
+        return redirect()->route('admin.categories')->with('success', 'category has been updated successfully');
+    }
+
+
 }
