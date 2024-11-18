@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Brand;
-use Carbon\Carbon;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Intervention\Image\Laravel\Facades\Image;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 
 class AdminController extends Controller
 {
@@ -30,8 +31,6 @@ class AdminController extends Controller
             'slug' => 'required|unique:brands,slug',
             'image' => 'required|image|mimes:png,jpg,jpeg|max:2048'
         ]);
-
-
         $brand = new Brand();
         $brand->name = $request->name;
         $brand->slug = $request->slug;
@@ -40,37 +39,41 @@ class AdminController extends Controller
             $ext = $image->getClientOriginalExtension();
             $imageName = time() . '.' . $ext;
             $image->move(public_path('uploads/brands'), $imageName);
-            $brand->image = 'uploads/brands/' . $imageName;  
+            $brand->image = 'uploads/brands/' . $imageName;
         }
         $brand->save();
 
         return redirect()->route('admin.brands')->with('success', 'Brand has been added successfully');
     }
 
-    // public function storeBrand(Request $request){
-    //     $request->validate([
-    //         'name'=>'required|string',
-    //         'slug'=>'required|unique:brands,slug',
-    //         'image'=>'required|mimes:png,jpg,jpeg'
-    //     ]);
+    //to edit brand
+    public function editBrand($id){
+        $brand=Brand::findOrFail($id);
+        return view('admin.editBrand',compact('brand'));
+    }
 
-    //     $brand=new Brand();
-    //     $brand->name=$request->name;
-    //     $brand->slug=$request->slug;
-    //     $image=$request->image;
-    //     $file_ext=$request->file('image')->extension();
-    //     $file_name=Carbon::neew()->timestamp.'.'.$file_ext;
-    //     $this->GenerateBrandImage($image,$file_name);
-    //     $brand->image=$file_name;
-    //     $brand->save();
-    //     return redirect()->route('admin.brands')->with('success','Brand has been added successfuly');
-    // }
-    // public function GenerateBrandImage($image,$imageName){
-    //     $destination=public_path('uploads/brands');
-    //     $img=Image::read($image->path);
-    //     $img->cover(124,124,('top'));
-    //     $img->resize(124.124,function($constraint){
-    //         $constraint->aspectRatio();
-    //     })->save($destination.'/'.$imageName);
-    // }
+    //to store updated data
+    public function updateBrand(Request $request){
+        // Validation
+        $request->validate([
+            'name' => 'required|string',
+            'slug' => 'required|unique:brands,slug',
+            'image' => 'image|mimes:png,jpg,jpeg|max:2048'
+        ]);
+        $brand=Brand::find($request->id);
+        $brand->name = $request->name;
+        $brand->slug = $request->slug;
+        if (!empty($request->image)) {
+            if (File::exists(public_path('uploads/brands/' . $brand->image))) {
+                File::delete(public_path('uploads/brands/' . $brand->image));
+            }
+            $image = $request->image;
+            $ext = $image->getClientOriginalExtension();
+            $imageName = time() . '.' . $ext;
+            $image->move(public_path('uploads/brands'), $imageName);
+            $brand->image = 'uploads/brands/' . $imageName;
+        }
+        $brand->save();
+        return redirect()->route('admin.brands')->with('success', 'Brand has been updated successfully');
+    }
 }
