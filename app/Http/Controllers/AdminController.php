@@ -127,7 +127,7 @@ class AdminController extends Controller
         return view('admin.category.editCategory',compact('category'));
     }
 
-    //to store updated data
+    //to store updated category
     public function updateCategory(Request $request){
         // Validation
         $request->validate([
