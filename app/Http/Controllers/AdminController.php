@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Brand;
+use App\Models\Category;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,7 +20,7 @@ class AdminController extends Controller
     }
 
 
-    //toshow the add brand page
+    //to show the add brand page
     public function addBrand(){
         return view('admin.addBrand');
     }
@@ -86,4 +87,38 @@ class AdminController extends Controller
         $brand->delete();
         return redirect()->route('admin.brands')->with('success', 'Brand has been deleted successfully');
     }
+
+
+    //categories
+    public function categories(){
+        $categories=Category::orderBy('id','DESC')->paginate(10);
+        return view('admin.category.categories',compact('categories'));
+    }
+    //to show the add brand page
+    public function addCategory(){
+        return view('admin.category.addCategory');
+    }
+    //to store Category
+    public function storeCategory(Request $request){
+        // Validation
+        $request->validate([
+            'name' => 'required|string',
+            'slug' => 'required|unique:categories,slug',
+            'image' => 'required|image|mimes:png,jpg,jpeg|max:2048'
+        ]);
+        $category = new Category();
+        $category->name = $request->name;
+        $category->slug = $request->slug;
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $ext = $image->getClientOriginalExtension();
+            $imageName = time() . '.' . $ext;
+            $image->move(public_path('uploads/categories'), $imageName);
+            $category->image = 'uploads/categories/' . $imageName;
+        }
+        $category->save();
+
+        return redirect()->route('admin.categories')->with('success', 'category has been added successfully');
+    }
+
 }
