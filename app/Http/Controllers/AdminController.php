@@ -222,25 +222,93 @@ class AdminController extends Controller
         // Handle gallery images upload
         if ($request->hasFile('images')) {
             $galleryArr = [];
-            $counter = 1;
-            $allowedFileExtensions = ['png', 'jpg', 'jpeg'];
-            $files = $request->file('images');
-
-            foreach ($files as $file) {
-                $extension = $file->getClientOriginalExtension();
-                if (in_array($extension, $allowedFileExtensions)) {
-                    $fileName = Carbon::now()->timestamp . $counter . '.' . $extension;
-                    $file->move(public_path('uploads/products/gallery'), $fileName);
-                    $galleryArr[] = 'uploads/products/gallery/' . $fileName; // Using array append syntax
-                    $counter++;
-                }
+            foreach ($request->file('images') as $file) {
+                $fileName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('uploads/products/gallery'), $fileName);
+                $galleryArr[] = 'uploads/products/gallery/' . $fileName;
             }
-
-            $product->images = implode(",", $galleryArr); // Improved string joining
+            $product->images = implode(',', $galleryArr);
         }
 
         $product->save();
 
         return redirect()->route('admin.products')->with('success', 'Product has been added successfully!');
     }
+
+    //update
+    public function editProduct($id){
+        $product=Product::findOrFail($id);
+        $categories=Category::select('id','name')->orderBy('name')->get();
+        $brands=Brand::select('id','name')->orderBy('name')->get();
+        return view('admin.product.editProduct',compact('categories','brands','product'));
+    }
+
+    public function updateProduct(Request $request){
+        $request->validate([
+            'name' => 'required',
+            'slug' => 'required|unique:products,slug,' . $request->id,
+            'short_description' => 'required',
+            'description' => 'required',
+            'regular_price' => 'required',
+            'sale_price' => 'required',
+            'SKU' => 'required',
+            'stock_status' => 'required',
+            'featured' => 'required',
+            'quantity' => 'required',
+            'image' => 'mimes:png,jpg,jpeg|max:2048',
+            'category_id' => 'required',
+            'brand_id' => 'required',
+        ]);
+        $product=Product::findOrFail($request->id);
+        $product->name = $request->input('name');
+        $product->slug = Str::slug($request->input('name')); // Use Str::slug() for better readability
+        $product->short_description = $request->input('short_description');
+        $product->description = $request->input('description');
+        $product->regular_price = $request->input('regular_price');
+        $product->sale_price = $request->input('sale_price');
+        $product->SKU = $request->input('SKU');
+        $product->stock_status = $request->input('stock_status');
+        $product->featured = $request->input('featured');
+        $product->quantity = $request->input('quantity');
+        $product->category_id = $request->input('category_id');
+        $product->brand_id = $request->input('brand_id');
+
+        if ($request->hasFile('image')) {
+            if (File::exists(public_path('uploads/products/' . $product->image))) {
+                File::delete(public_path('uploads/products/' . $product->image));
+            }
+            $image = $request->file('image');
+            $ext = $image->getClientOriginalExtension();
+            $imageName = time() . '.' . $ext;
+            $image->move(public_path('uploads/products'), $imageName);
+            $product->image = 'uploads/products/' . $imageName;
+        }
+
+        //gallery image
+        if ($request->hasFile('images')) {
+            if (!empty($product->images)) {
+                $oldImages = explode(',', $product->images);
+                foreach ($oldImages as $oldImage) {
+                    $imagePath = public_path($oldImage);
+                    if (File::exists($imagePath)) {
+                        File::delete($imagePath);
+                    } else {
+                        logger("Image not found: " . $imagePath);
+                    }
+                }
+            }
+            $galleryArr = [];
+            foreach ($request->file('images') as $file) {
+                $fileName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('uploads/products/gallery'), $fileName);
+                $galleryArr[] = 'uploads/products/gallery/' . $fileName;
+            }
+            $product->images = implode(',', $galleryArr);
+            $product->save();
+        }
+        $product->save();
+            $product->save();
+            return redirect()->route('admin.products')->with('success', 'product has been updated successfully');
+    }
+
 }
