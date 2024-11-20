@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Brand;
 use App\Models\Category;
+use App\Models\Product;
 use App\Models\User;
+use Illuminate\Support\Str;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 
 class AdminController extends Controller
@@ -161,4 +163,84 @@ class AdminController extends Controller
         return redirect()->route('admin.categories')->with('success', 'Category has been deleted successfully');
     }
 
+    //products
+    public function products(){
+        $products = Product::orderBy('created_at', 'DESC')->paginate(10);
+        return view('admin.product.products',compact('products'));
+    }
+
+    //to show the add product page
+    public function addProduct(){
+        $categories=Category::select('id','name')->orderBy('name')->get();
+        $brands=Brand::select('id','name')->orderBy('name')->get();
+        return view('admin.product.addProduct',compact('categories','brands'));
+    }
+
+    //to store product in db
+    public function storeProduct(Request $request){
+        // Validation
+        $request->validate([
+            'name' => 'required|max:100',
+            'slug' => 'required|unique:products,slug|max:100',
+            'short_description' => 'required|max:255',
+            'description' => 'required|max:1000',
+            'regular_price' => 'required|numeric|min:0',
+            'sale_price' => 'required|numeric|min:0',
+            'SKU' => 'required|unique:products,SKU|max:50',
+            'stock_status' => 'required|in:instock,outofstock',
+            'featured' => 'required|boolean',
+            'quantity' => 'required|integer|min:1',
+            'image' => 'required|mimes:png,jpg,jpeg|max:2048',
+            'category_id' => 'required|exists:categories,id',
+            'brand_id' => 'required|exists:brands,id',
+        ]);
+
+        // Create product
+        $product = new Product();
+        $product->name = $request->input('name');
+        $product->slug = Str::slug($request->input('name')); // Use Str::slug() for better readability
+        $product->short_description = $request->input('short_description');
+        $product->description = $request->input('description');
+        $product->regular_price = $request->input('regular_price');
+        $product->sale_price = $request->input('sale_price');
+        $product->SKU = $request->input('SKU');
+        $product->stock_status = $request->input('stock_status');
+        $product->featured = $request->input('featured');
+        $product->quantity = $request->input('quantity');
+        $product->category_id = $request->input('category_id');
+        $product->brand_id = $request->input('brand_id');
+
+        // Handle main image upload
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $ext = $image->getClientOriginalExtension();
+            $imageName = Carbon::now()->timestamp . '.' . $ext;
+            $image->move(public_path('uploads/products'), $imageName);
+            $product->image = 'uploads/products/' . $imageName;
+        }
+
+        // Handle gallery images upload
+        if ($request->hasFile('images')) {
+            $galleryArr = [];
+            $counter = 1;
+            $allowedFileExtensions = ['png', 'jpg', 'jpeg'];
+            $files = $request->file('images');
+
+            foreach ($files as $file) {
+                $extension = $file->getClientOriginalExtension();
+                if (in_array($extension, $allowedFileExtensions)) {
+                    $fileName = Carbon::now()->timestamp . $counter . '.' . $extension;
+                    $file->move(public_path('uploads/products/gallery'), $fileName);
+                    $galleryArr[] = 'uploads/products/gallery/' . $fileName; // Using array append syntax
+                    $counter++;
+                }
+            }
+
+            $product->images = implode(",", $galleryArr); // Improved string joining
+        }
+
+        $product->save();
+
+        return redirect()->route('admin.products')->with('success', 'Product has been added successfully!');
+    }
 }
