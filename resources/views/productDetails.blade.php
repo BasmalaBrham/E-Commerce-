@@ -453,11 +453,9 @@
             <use href="#icon_next_md" />
           </svg>
         </div><!-- /.products-carousel__next -->
-
         <div class="products-pagination mt-4 mb-5 d-flex align-items-center justify-content-center"></div>
         <!-- /.products-pagination -->
       </div><!-- /.position-relative -->
-
     </section><!-- /.products-carousel container -->
   </main>
 @endsection
