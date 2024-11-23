@@ -137,7 +137,7 @@ class AdminController extends Controller
             'slug' => 'required|unique:categories,slug',
             'image' => 'image|mimes:png,jpg,jpeg|max:2048'
         ]);
-        $category=Brand::find($request->id);
+        $category=Category::find($request->id);
         $category->name = $request->name;
         $category->slug = $request->slug;
         if (!empty($request->image)) {
