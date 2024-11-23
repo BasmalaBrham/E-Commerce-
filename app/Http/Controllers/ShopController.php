@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Brand;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
@@ -12,6 +13,7 @@ class ShopController extends Controller
         $o_column = "";
         $o_order = "";
         $order = $request->query('order') ?? -1;
+        $f_brands=$request->query('brands');
         switch ($order) {
             case 1:
                 $o_column = 'created_at';
@@ -33,9 +35,14 @@ class ShopController extends Controller
                 $o_column = 'id';
                 $o_order = 'DESC';
         }
-
-        $products=Product::orderBy($o_column,$o_order)->paginate($size);
-        return view('shop',compact('products','size','order'));
+        $brands=Brand::orderBy('name','ASC')->get();
+        $brandsFilter = $f_brands ? explode(',', $f_brands) : [];
+        $products = Product::when($brandsFilter, function ($query) use ($brandsFilter) {
+            $query->whereIn('brand_id', $brandsFilter);
+        })
+        ->orderBy($o_column, $o_order)
+        ->paginate($size);
+        return view('shop',compact('products','size','order','brands','f_brands'));
     }
     public function productDetails($product_slug){
         $product=Product::where('slug',$product_slug)->first();
