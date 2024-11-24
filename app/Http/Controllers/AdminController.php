@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Brand;
 use App\Models\Category;
+use App\Models\Coupon;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Support\Str;
@@ -323,5 +324,31 @@ class AdminController extends Controller
         return redirect()->route('admin.products')->with('success', 'Product has been deleted successfully');
     }
 
-
+    //coupons
+    public function coupons(){
+        $coupons=Coupon::orderBy('expiry_date','DESC')->paginate(12);
+        return view('admin.coupon.coupons',compact('coupons'));
+    }
+    //to show add coupon page
+    public function addCoupon(){
+        return view('admin.coupon.addCoupon');
+    }
+    //to store data
+    public function storeCoupon(Request $request){
+        $request->validate([
+            'code'=>'required',
+            'type'=>'required',
+            'value'=>'required|numeric',
+            'cart_value'=>'required|numeric',
+            'expiry_date'=>'required|date'
+        ]);
+        $coupon=new Coupon();
+        $coupon->code=$request->code;
+        $coupon->type=$request->type;
+        $coupon->value=$request->value;
+        $coupon->cart_value=$request->cart_value;
+        $coupon->expiry_date=$request->expiry_date;
+        $coupon->save();
+        return redirect()->route('admin.coupons')->with('success','Coupons has been added successfully');
+    }
 }
