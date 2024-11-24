@@ -134,10 +134,14 @@
           @endif
           <div class="product-single__addtolinks">
             @if(Cart::instance('wishlist')->content()->where('id',$product->id)->count()>0)
-            <a href="javascript:void(0)" class="menu-link menu-link_us-s add-to-wishlist filled-heart"><svg width="16" height="16" viewBox="0 0 20 20"
-                fill="none" xmlns="http://www.w3.org/2000/svg">
-                <use href="#icon_heart" />
-              </svg><span>Remove From Wishlist</span></a>
+            <form action="{{route('wishlist.item.remove',['rowId'=>Cart::instance('wishlist')->content()->where('id',$product->id)->first()->rowId])}}" method="post" id="frm-remove-item">
+                @csrf
+                @method('delete')
+                <a href="javascript:void(0)" class="menu-link menu-link_us-s add-to-wishlist filled-heart" onclick="document.getElementById('frm-remove-item').submit();"><svg width="16" height="16" viewBox="0 0 20 20"
+                    fill="none" xmlns="http://www.w3.org/2000/svg" >
+                    <use href="#icon_heart" />
+                </svg><span>Remove From Wishlist</span></a>
+            </form>
             @else
             <form method="post" action="{{route('wishlist.add')}}" id="wishlist-form">
                 @csrf
