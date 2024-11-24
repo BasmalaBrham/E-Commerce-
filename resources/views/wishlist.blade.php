@@ -43,16 +43,26 @@
                                     {{$item->qty}}
                                 </td>
                                 <td>
-                                    <form action="{{route('wishlist.item.remove',$item->rowId)}}" method="post" id="remove_form-{{$item->id}}">
-                                        @csrf
-                                        @method('delete')
-                                        <a href="javascript:void(0)" class="remove-cart" onclick="document.getElementById('remove_form-{{$item->id}}').submit();">
-                                        <svg width="10" height="10" viewBox="0 0 10 10" fill="#767676" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M0.259435 8.85506L9.11449 0L10 0.885506L1.14494 9.74056L0.259435 8.85506Z" />
-                                        <path d="M0.885506 0.0889838L9.74057 8.94404L8.85506 9.82955L0 0.97449L0.885506 0.0889838Z" />
-                                        </svg>
-                                        </a>
-                                    </form>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <form action="{{route('wishlist.move.to.cart',$item->rowId)}}" method="post">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-warning">Move To Cart</button>
+                                            </form>
+                                        </div>
+                                        <div class="col-6">
+                                            <form action="{{route('wishlist.item.remove',$item->rowId)}}" method="post" id="remove_form-{{$item->id}}">
+                                                @csrf
+                                                @method('delete')
+                                                <a href="javascript:void(0)" class="remove-cart" onclick="document.getElementById('remove_form-{{$item->id}}').submit();">
+                                                <svg width="10" height="10" viewBox="0 0 10 10" fill="#767676" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M0.259435 8.85506L9.11449 0L10 0.885506L1.14494 9.74056L0.259435 8.85506Z" />
+                                                <path d="M0.885506 0.0889838L9.74057 8.94404L8.85506 9.82955L0 0.97449L0.885506 0.0889838Z" />
+                                                </svg>
+                                                </a>
+                                            </form>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach
