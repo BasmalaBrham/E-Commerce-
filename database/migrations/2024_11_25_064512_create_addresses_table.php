@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->bigInteger('user_id')->unsigned();
             $table->string('name');
-            $table->string('phones');
+            $table->string('phone');
             $table->string('locality');
             $table->text('address');
             $table->string('city');

@@ -43,6 +43,8 @@ Route::post('/wishlist/move-to-cart/{rowId}',[WishlistController::class,'moveToC
 
 Route::get('/checkout',[CartController::class,'checkout'])->name('cart.checkout');
 
+
+
 Route::middleware(['auth'])->group(function(){
     Route::get('/account-dashboard',[UserController::class,'index'])->name('user.index');
 });
@@ -73,7 +75,8 @@ Route::middleware(['auth',AuthAdmin::class])->group(function(){
     Route::get('/admin/coupons', [AdminController::class, 'coupons'])->name('admin.coupons');
     Route::get('/admin/coupon/add', [AdminController::class, 'addCoupon'])->name('admin.coupon.add');
     Route::post('/admin/coupon/store', [AdminController::class, 'storeCoupon'])->name('admin.coupon.store');
-    Route::get('/admin/coupon/edit/{id}', [AdminController::class, 'editCoupon'])->name('admin.coupon.edit');
+   Route::post('/place-an-order',[CartController::class,'placeAnOrder'])->name('cart.place.an.order');
+Route::get('/order-confirmation',[CartController::class,'orderConfirmation'])->name('cart.order.confirmation'); Route::get('/admin/coupon/edit/{id}', [AdminController::class, 'editCoupon'])->name('admin.coupon.edit');
     Route::put('/admin/coupon/update', [AdminController::class, 'updateCoupon'])->name('admin.coupon.update');
     Route::delete('/admin/coupon/{id}/delete', [AdminController::class, 'deleteCoupon'])->name('admin.coupon.delete');
 });

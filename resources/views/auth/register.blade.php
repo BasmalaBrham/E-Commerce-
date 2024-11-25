@@ -27,7 +27,7 @@
               </div>
               <div class="pb-3"></div>
               <div class="form-floating mb-3">
-                <input id="email" type="email" class="form-control form-control_gray @error('email') is-invalid @enderror " name="email" value="{{ old('email') }}" required=""
+                <input id="email" type="email" class="form-control form-control_gray @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required=""
                   autocomplete="email">
                 <label for="email">Email address *</label>
                 @error('email')
