@@ -41,6 +41,7 @@ Route::delete('/wishlist/item/remove/{rowId}',[WishlistController::class,'remove
 Route::delete('/wishlist/clear',[WishlistController::class,'emptyWishlist'])->name('wishlist.item.clear');
 Route::post('/wishlist/move-to-cart/{rowId}',[WishlistController::class,'moveToCart'])->name('wishlist.move.to.cart');
 
+Route::get('/checkout',[CartController::class,'checkout'])->name('cart.checkout');
 
 Route::middleware(['auth'])->group(function(){
     Route::get('/account-dashboard',[UserController::class,'index'])->name('user.index');
