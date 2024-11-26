@@ -179,23 +179,27 @@ class CartController extends Controller
             Session::forget(('checkout'));
             return;
         }
-        if(Session::has('coupon')){
-            Session::put('checkout',[
-                'discount'=>Session::get('discounts')['discount'],
-                'subtotal'=>Session::get('discounts')['subtotal'],
-                'tax'=>Session::get('discounts')['tax'],
-                'total'=>Session::get('discounts')['total'],
+        if (Session::has('coupon')) {
+            Session::put('checkout', [
+                'discount' => Session::get('discounts')['discount'],
+                'subtotal' => Session::get('discounts')['subtotal'],
+                'tax'      => Session::get('discounts')['tax'],
+                'total'    => Session::get('discounts')['total'],
             ]);
-        }
-        else{
-            Session::put('checkout',[
-                'discount'=>0,
-                'subtotal'=>Session::get('cart')->subtotal(),
-                'tax'=>Session::get('cart')->tax(),
-                'total'=>Session::get('cart')->total(),
-            ]);
+        } else {
+            $cart = Session::get('cart');
+            $subtotal = is_object($cart) ? $cart->subtotal() : 0;
+            $tax = is_object($cart) ? $cart->tax() : 0;
+            $total = is_object($cart) ? $cart->total() : 0;
 
+            Session::put('checkout', [
+                'discount' => 0,
+                'subtotal' => $subtotal,
+                'tax'      => $tax,
+                'total'    => $total,
+            ]);
         }
+
     }
     public function orderConfirmation (){
         if(Session::has('order_id')){
