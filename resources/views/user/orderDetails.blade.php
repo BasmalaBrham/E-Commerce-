@@ -116,6 +116,7 @@
                         </div>
                     </div>
                     <div class="table-responsive">
+                        @include('message')
                         <table class="table table-striped table-bordered">
                             <thead>
                                 <tr>
@@ -255,9 +256,38 @@
                         </tbody>
                     </table>
                 </div>
+                @if($order->status=='ordered')
+                    <div class="wg-box mt-5 text-right">
+                        <form action="{{ route('user.order.cancel') }}" method="post">
+                            @csrf
+                            @method('put')
+                            <input type="hidden" name="order_id" value="{{$order->id}}">
+                            <button type="button" class="btn btn-danger cancel-order">Cancel Order</button>
+                        </form>
+                    </div>
+                @endif
             </div>
-
         </div>
     </section>
 </main>
 @endsection
+@push('scripts')
+<script>
+$(function() {
+    $('.cancel-order').on('click', function(e) {
+        e.preventDefault();
+        var form = $(this).closest('form');
+        swal({
+            title: "Are you sure?",
+            text: "You want to cancel this order ?",
+            icon: "warning",
+            buttons: ["No", "Yes"],
+            confirmButtonColor: '#dc3545'
+        }).then(function(result) {
+            if (result) {
+                form.submit();
+            }
+        });
+    });
+});
+</script>
