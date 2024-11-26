@@ -31,6 +31,7 @@
                 <a class="tf-button style-1 w208" href="{{route('admin.orders')}}">Back</a>
             </div>
             <div class="table-responsive">
+                @include('message')
                 <table class="table table-striped table-bordered">
                     <thead>
                         <tr>
@@ -174,6 +175,29 @@
                     </tr>
                 </tbody>
             </table>
+        </div>
+        <div class="wg-box mt-5">
+            <h5>UpdateTransactions</h5>
+            <form action="{{route('admin.order.update.status')}}" method="post">
+                @csrf
+                @method('put')
+                <input type="hidden" name="order_id" value="{{$order->id}}">
+                <div class="row">
+                    <div class="col-md-3">
+                       <div class="select">
+                            <select name="order_status" id="order_status">
+                                <option value="ordered"{{$order->state=='ordered'?'selected':''}}>Ordered</option>
+                                <option value="delivered"{{$order->state=='delivered'?'selected':''}}>Delivered</option>
+                                <option value="canceled"{{$order->state=='canceled'?'selected':''}}>Canceled</option>
+                            </select>
+                       </div>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary tf-button w200">Udate Satus</button>
+                    </div>
+                </div>
+            </form>
+
         </div>
     </div>
 </div>

@@ -142,7 +142,7 @@
                         <td>${{Cart::instance('cart')->subtotal()}}</td>
                     </tr>
                     <tr>
-                        <th>Discount {{ Session::get('coupon')['code'] }}</th>
+                        <th>Discount</th>
                         <td>${{ Session::get('discounts')['discount'] }}</td>
                     </tr>
                     <tr>
