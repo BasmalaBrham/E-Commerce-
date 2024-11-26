@@ -6,7 +6,9 @@ use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Coupon;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
@@ -386,5 +388,12 @@ class AdminController extends Controller
     public function orders(){
         $orders=Order::orderBy('created_at','DESC')->paginate(12);
         return view('admin.order.orders',compact('orders'));
+    }
+    //to show order details
+    public function orderDetails($order_id){
+        $order=Order::find($order_id);
+        $orderItems=OrderItem::where('order_id',$order_id)->orderBy('created_at','DESC')->paginate(12);
+        $transaction=Transaction::where('order_id',$order_id)->first();
+        return view('admin.order.orderDetails',compact('order','orderItems','transaction'));
     }
 }
