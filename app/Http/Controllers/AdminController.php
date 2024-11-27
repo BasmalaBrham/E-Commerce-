@@ -8,6 +8,7 @@ use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\Slide;
 use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Support\Str;
@@ -417,6 +418,84 @@ class AdminController extends Controller
         }
 
         return back()->with("success", "Status changed successfully");
+    }
+
+    public function slides(){
+        $slides= Slide::orderBy('created_at','DESC')->paginate(12);
+        return view('admin.slide.slides',compact('slides'));
+    }
+
+    public function addSlide(){
+        return view('admin.slide.addSlide');
+    }
+
+    public function storeSlide(Request $request){
+        $request->validate([
+            'tagline'=>'required',
+            'title'=>'required',
+            'subtitle'=>'required',
+            'link'=>'required',
+            'image'=>'required|mimes:png,jpg,jpeg|max:2024',
+            'status'=>'required'
+        ]);
+        $slide=new Slide();
+        $slide->tagline=$request->tagline;
+        $slide->title=$request->title;
+        $slide->subtitle=$request->subtitle;
+        $slide->link=$request->link;
+        $slide->status=$request->status;
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $ext = $image->getClientOriginalExtension();
+            $imageName = time() . '.' . $ext;
+            $image->move(public_path('uploads/slides'), $imageName);
+            $slide->image = 'uploads/slides/' . $imageName;
+        }
+        $slide->save();
+        return redirect()->route('admin.slides')->with('success','Slide added successfully!');
+    }
+
+    public function editSlide($id){
+        $slide=Slide::findOrFail($id);
+        return view('admin.slide.editSlide',compact('slide'));
+    }
+
+    public function updateSlide(Request $request){
+        $request->validate([
+            'tagline'=>'required',
+            'title'=>'required',
+            'subtitle'=>'required',
+            'link'=>'required',
+            'image'=>'required|mimes:png,jpg,jpeg|max:2024',
+            'status'=>'required'
+        ]);
+        $slide=Slide::find($request->id);
+        $slide->tagline=$request->tagline;
+        $slide->title=$request->title;
+        $slide->subtitle=$request->subtitle;
+        $slide->link=$request->link;
+        $slide->status=$request->status;
+        if ($request->hasFile('image')) {
+            if (!empty($slide->image) && File::exists(public_path($slide->image))) {
+                File::delete(public_path($slide->image));
+            }
+            $image = $request->image;
+            $ext = $image->getClientOriginalExtension();
+            $imageName = time() . '.' . $ext;
+            $image->move(public_path('uploads/slides'), $imageName);
+            $slide->image = 'uploads/slides/' . $imageName;
+        }
+        $slide->save();
+        return redirect()->route('admin.slides')->with('success', 'slide$slide has been updated successfully');
+    }
+    //tO delete
+    public function deleteSlide($id){
+        $slide = Slide::findOrFail($id);
+        if (!empty($slide->image) && File::exists(public_path($slide->image))) {
+            File::delete(public_path($slide->image));
+        }
+        $slide->delete();
+        return redirect()->route('admin.slides')->with('success', 'slide$slide has been deleted successfully');
     }
 
 }

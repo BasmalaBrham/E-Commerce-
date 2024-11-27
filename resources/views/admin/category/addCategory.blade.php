@@ -97,7 +97,6 @@ $(function() {
     });
 });
 
-// تحويل النص إلى صيغة slug
 function StringToSlug(Text) {
     return Text.toLowerCase()
         .replace(/[^a-z0-9\s-]/g, '')
