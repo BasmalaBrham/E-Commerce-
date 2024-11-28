@@ -2,25 +2,78 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Brand;
-use App\Models\Category;
-use App\Models\Coupon;
-use App\Models\Order;
-use App\Models\OrderItem;
-use App\Models\Product;
-use App\Models\Slide;
-use App\Models\Transaction;
-use App\Models\User;
-use Illuminate\Support\Str;
 use Carbon\Carbon;
+use App\Models\User;
+use App\Models\Brand;
+use App\Models\Order;
+use App\Models\Slide;
+use App\Models\Coupon;
+use App\Models\Product;
+use App\Models\Category;
+use App\Models\OrderItem;
+use App\Models\Transaction;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 
 class AdminController extends Controller
 {
     public function index(){
-        return view('admin.index');
+        $orders = Order::orderBy('created_at', 'DESC')->take(10)->get();
+
+        $dashboardData = DB::select("
+            SELECT
+                SUM(total) AS TotalAmount,
+                SUM(IF(status = 'ordered', total, 0)) AS TotalOrderedAmount,
+                SUM(IF(status = 'delivered', total, 0)) AS TotalDeliveredAmount,
+                SUM(IF(status = 'canceled', total, 0)) AS TotalCanceledAmount,
+                COUNT(*) AS Total,
+                SUM(IF(status = 'ordered', 1, 0)) AS TotalOrdered,
+                SUM(IF(status = 'delivered', 1, 0)) AS TotalDelivered,
+                SUM(IF(status = 'canceled', 1, 0)) AS TotalCanceled
+            FROM orders
+        ");
+
+        $monthlyData = DB::select("
+            SELECT
+                M.id AS MonthId,
+                M.name AS MonthName,
+                IFNULL(D.TotalAmount, 0) AS TotalAmount,
+                IFNULL(D.TotalOrderedAmount, 0) AS TotalOrderedAmount,
+                IFNULL(D.TotalDeliveredAmount, 0) AS TotalDeliveredAmount,
+                IFNULL(D.TotalCanceledAmount, 0) AS TotalCanceledAmount
+            FROM month_names M
+            LEFT JOIN (
+                SELECT
+                    MONTH(created_at) AS MonthId,
+                    SUM(total) AS TotalAmount,
+                    SUM(IF(status = 'ordered', total, 0)) AS TotalOrderedAmount,
+                    SUM(IF(status = 'delivered', total, 0)) AS TotalDeliveredAmount,
+                    SUM(IF(status = 'canceled', total, 0)) AS TotalCanceledAmount
+                FROM orders
+                WHERE YEAR(created_at) = YEAR(NOW())
+                GROUP BY MONTH(created_at)
+            ) D ON D.MonthId = M.id
+        ");
+
+        $Amount = implode(',', collect($monthlyData)->pluck('TotalAmount')->toArray());
+        $OrderedAmount = implode(',', collect($monthlyData)->pluck('TotalOrderedAmount')->toArray());
+        $DeliveredAmount = implode(',', collect($monthlyData)->pluck('TotalDeliveredAmount')->toArray());
+        $CanceledAmount = implode(',', collect($monthlyData)->pluck('TotalCanceledAmount')->toArray());
+
+        $TotalAmount = collect($monthlyData)->sum('TotalAmount');
+        $TotalOrderedAmount = collect($monthlyData)->sum('TotalOrderedAmount');
+        $TotalDeliveredAmount = collect($monthlyData)->sum('TotalDeliveredAmount');
+        $TotalCanceledAmount = collect($monthlyData)->sum('TotalCanceledAmount');
+
+        return view('admin.index', compact(
+            'orders', 'dashboardData', 'Amount', 'OrderedAmount', 'DeliveredAmount',
+            'CanceledAmount', 'TotalAmount', 'TotalOrderedAmount', 'TotalDeliveredAmount',
+            'TotalCanceledAmount'
+        ));
     }
+
     public function brands(){
         $brands=Brand::orderBy('id','DESC')->paginate(10);
         return view('admin.brand',compact('brands'));
