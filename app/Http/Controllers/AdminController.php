@@ -124,8 +124,8 @@ class AdminController extends Controller
         $brand=Brand::find($request->id);
         $brand->name = $request->name;
         $brand->slug = $request->slug;
-        if (!empty($request->image)) {
-            if (File::exists(public_path('uploads/brands/' . $brand->image))) {
+        if ($request->hasFile('image')) {
+            if (!empty($category->image) &&(public_path('uploads/brands/' . $brand->image))) {
                 File::delete(public_path('uploads/brands/' . $brand->image));
             }
             $image = $request->image;
@@ -141,7 +141,7 @@ class AdminController extends Controller
     //to delete brand
     public function deleteBrand($id){
         $brand = Brand::findOrFail($id);
-        if (File::exists(public_path('uploads/brands/' . $brand->image))) {
+        if (!empty($category->image) &&(public_path('uploads/brands/' . $brand->image))) {
             File::delete(public_path('uploads/brands/' . $brand->image));
         }
         $brand->delete();
@@ -192,15 +192,15 @@ class AdminController extends Controller
         // Validation
         $request->validate([
             'name' => 'required|string',
-            'slug' => 'required|unique:categories,slug',
+            'slug' => 'required',
             'image' => 'image|mimes:png,jpg,jpeg|max:2048'
         ]);
         $category=Category::find($request->id);
         $category->name = $request->name;
         $category->slug = $request->slug;
-        if (!empty($request->image)) {
-            if (File::exists(public_path('uploads/categories/' . $category->image))) {
-                File::delete(public_path('uploads/categories/' . $category->image));
+        if ($request->hasFile('image')) {
+            if (!empty($category->image) && File::exists(public_path($category->image))) {
+                File::delete(public_path($category->image));
             }
             $image = $request->image;
             $ext = $image->getClientOriginalExtension();
@@ -214,8 +214,8 @@ class AdminController extends Controller
     //tO delete
     public function deleteCategory($id){
         $category = Category::findOrFail($id);
-        if (File::exists(public_path('uploads/categories/' . $category->image))) {
-            File::delete(public_path('uploads/categories/' . $category->image));
+        if (!empty($category->image) && File::exists(public_path($category->image))) {
+            File::delete(public_path($category->image));
         }
         $category->delete();
         return redirect()->route('admin.categories')->with('success', 'Category has been deleted successfully');
@@ -332,7 +332,7 @@ class AdminController extends Controller
         $product->brand_id = $request->input('brand_id');
 
         if ($request->hasFile('image')) {
-            if (File::exists(public_path('uploads/products/' . $product->image))) {
+            if (!empty($product->image) &&('uploads/products/' . $product->image)) {
                 File::delete(public_path('uploads/products/' . $product->image));
             }
             $image = $request->file('image');
@@ -371,10 +371,10 @@ class AdminController extends Controller
     //delete product
     public function deleteProduct($id){
         $product = Product::findOrFail($id);
-        if (File::exists(public_path('uploads/products/' . $product->image))) {
+        if (!empty($product->image) && (public_path('uploads/products/' . $product->image))) {
             File::delete(public_path('uploads/products/' . $product->image));
         }
-        if (File::exists(public_path('uploads/products/gallery/' . $product->image))) {
+        if (!empty($product->image) && (public_path('uploads/products/gallery/' . $product->image))) {
             File::delete(public_path('uploads/products/gallery/' . $product->image));
         }
         $product->delete();
