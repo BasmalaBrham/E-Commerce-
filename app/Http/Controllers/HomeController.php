@@ -41,5 +41,10 @@ class HomeController extends Controller
 
         return redirect()->back()->with('success', 'Your message has been sent successfully');
     }
-
+    public function search(Request $request)
+    {
+        $query = $request->input('query');
+        $result = Product::where('name', 'like', "%{$query}%")->get()->take(8);
+        return response()->json($result);
+    }
 }

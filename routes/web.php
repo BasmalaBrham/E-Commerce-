@@ -47,6 +47,7 @@ Route::get('/order-confirmation',[CartController::class,'orderConfirmation'])->n
 
 Route::get('/contact-us',[HomeController::class,'contact'])->name('home.contact');
 Route::post('/contact/store',[HomeController::class,'storeContact'])->name('home.contact.store');
+Route::get('/search', [HomeController::class, 'search'])->name('home.search');
 
 Route::middleware(['auth'])->group(function(){
     Route::get('/account-dashboard',[UserController::class,'index'])->name('user.index');

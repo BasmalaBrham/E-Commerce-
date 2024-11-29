@@ -562,5 +562,5 @@ class AdminController extends Controller
         $contact->delete();
         return redirect()->back()->with('success', 'Contact deleted successfully');
     }
-
+   
 }
